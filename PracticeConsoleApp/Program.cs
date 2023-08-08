@@ -17,6 +17,23 @@ namespace PracticeConsoleApp
             }
 
             int count = line.Length;
+            bool isCorrect = true;
+
+            for (int i = 0; i < count; i++)
+            {
+                if (line[i] is < 'a' or > 'z')
+                {
+                    isCorrect = false;
+                    Console.WriteLine($"Неверный символ '{line[i]}'");
+                }
+            }
+
+            if (!isCorrect)
+            {
+                Console.WriteLine("Для ввода допустимы только буквы английского алфавита в нижнем регистре");
+                return;
+            }
+
             StringBuilder stringBuilder = new();
 
             if (count % 2 == 0)
