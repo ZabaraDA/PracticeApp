@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using PracticeConsoleApp.Model;
 
 namespace PracticeConsoleApp
 {
@@ -55,8 +56,42 @@ namespace PracticeConsoleApp
                 }
                 stringBuilder.Append(line);
             }
-
+            
             Console.WriteLine($"Результат: {stringBuilder}");
+
+            foreach (var item in GetSymbolСount(stringBuilder.ToString()))
+            {
+                Console.WriteLine($"Символ: '{item.Symbol}' повторяется {item.Count} раз(а)");
+            }
+        }
+
+        private static List<SymbolСounter> GetSymbolСount(string line)
+        {
+            List<SymbolСounter> symbolList = new();
+
+            for (int i = 0; i < line.Length; i++)
+            {
+                bool isRepeated = false;
+
+                for (int j = 0; j < symbolList.Count; j++)
+                {
+                    if (symbolList[j].Symbol == line[i])
+                    {
+                        symbolList[j].Count++;
+                        isRepeated = true;
+                        break;
+                    }
+                }
+                if (!isRepeated)
+                {
+                    symbolList.Add(new SymbolСounter
+                    {
+                        Symbol = line[i],
+                        Count = 1
+                    });
+                }
+            }
+            return symbolList;
         }
     }
 }
