@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using PracticeConsoleApp.Model;
+using PracticeConsoleApp.Models;
 
 namespace PracticeConsoleApp
 {
@@ -56,13 +56,64 @@ namespace PracticeConsoleApp
                 }
                 stringBuilder.Append(line);
             }
-            
+
             Console.WriteLine($"Результат: {stringBuilder}");
 
             foreach (var item in GetSymbolСount(stringBuilder.ToString()))
             {
                 Console.WriteLine($"Символ: '{item.Symbol}' повторяется {item.Count} раз(а)");
             }
+            Console.WriteLine($"Самая длинная подстрока начинающаяся и заканчивающаяся на гласную: {GetSubstring(stringBuilder.ToString())}");
+        }
+
+        private static string GetSubstring(string line)
+        {
+            char[] vowels = { 'a', 'e', 'i', 'o', 'u', 'y' };
+            bool isVowel = false;
+            int start = 0, end = 0;
+
+            for (int i = 0; i < line.Length+1; i++)
+            {
+                foreach (var vowel in vowels)
+                {
+                    if (vowel == line[i])
+                    {
+                        isVowel = true;
+                        start = i;
+                        break;
+                    }
+                }
+                if (isVowel)
+                {
+                    break;
+                }
+            }
+            isVowel = false;
+            for (int i = line.Length - 1; i > 0; i--)
+            {
+                foreach (var vowel in vowels)
+                {
+                    if (vowel == line[i])
+                    {
+                        isVowel = true;
+                        end = i;
+                        break;
+                    }
+                }
+                if (isVowel)
+                {    
+                    break;
+                }
+            }
+
+            StringBuilder substringBuilder = new();
+
+            for (int i = start; i <= end; i++)
+            {
+                substringBuilder.Append(line[i]);
+            }
+
+            return substringBuilder.ToString();
         }
 
         private static List<SymbolСounter> GetSymbolСount(string line)
