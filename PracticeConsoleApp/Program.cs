@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
+using System.Xml.Linq;
 using PracticeConsoleApp.Models;
 
 namespace PracticeConsoleApp
@@ -64,6 +66,25 @@ namespace PracticeConsoleApp
                 Console.WriteLine($"Символ: '{item.Symbol}' повторяется {item.Count} раз(а)");
             }
             Console.WriteLine($"Самая длинная подстрока начинающаяся и заканчивающаяся на гласную: {GetSubstring(stringBuilder.ToString())}");
+
+
+            SortedString sortedString = new SortedString(stringBuilder.ToString());
+            Console.WriteLine("Выберите тип сортировки\nВведите Q для быстрой сортировки\nВведите T для сортировки деревом");
+
+            string? option = Console.ReadLine();
+            if (option == "Q" || option == "q")
+            {
+                Console.WriteLine($"Отсортированная методом быстрой сортировки обработанная строка: {sortedString.GetQuickSortLine()}");
+            }
+            else if( option == "T" || option == "t")
+            {
+                Console.WriteLine($"Отсортированная методом сортировки деревом обработанная строка: {sortedString.GetTreeSortLine()}");
+            }
+            else
+            {
+                Console.WriteLine("Введено неверное значение. Сортировка не выполнена");
+            }
+
         }
 
         private static string GetSubstring(string line)
@@ -72,7 +93,7 @@ namespace PracticeConsoleApp
             bool isVowel = false;
             int start = 0, end = 0;
 
-            for (int i = 0; i < line.Length+1; i++)
+            for (int i = 0; i < line.Length; i++)
             {
                 foreach (var vowel in vowels)
                 {
@@ -88,6 +109,11 @@ namespace PracticeConsoleApp
                     break;
                 }
             }
+            if (isVowel == false)
+            {
+                return "В строке отсутствуют гласные буквы";
+            }
+
             isVowel = false;
             for (int i = line.Length - 1; i > 0; i--)
             {
@@ -144,5 +170,7 @@ namespace PracticeConsoleApp
             }
             return symbolList;
         }
+
+       
     }
 }
