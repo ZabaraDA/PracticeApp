@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Net;
+using System.Reflection.Emit;
 using System.Text;
 using System.Xml.Linq;
+using PracticeConsoleApp.Infrastructure;
 using PracticeConsoleApp.Models;
 
 namespace PracticeConsoleApp
 {
     internal class Program
     {
+
         static void Main(string[] args)
         {
             Console.WriteLine("Введите строку");
@@ -76,7 +80,7 @@ namespace PracticeConsoleApp
             {
                 Console.WriteLine($"Отсортированная методом быстрой сортировки обработанная строка: {sortedString.GetQuickSortLine()}");
             }
-            else if( option == "T" || option == "t")
+            else if (option == "T" || option == "t")
             {
                 Console.WriteLine($"Отсортированная методом сортировки деревом обработанная строка: {sortedString.GetTreeSortLine()}");
             }
@@ -84,6 +88,23 @@ namespace PracticeConsoleApp
             {
                 Console.WriteLine("Введено неверное значение. Сортировка не выполнена");
             }
+
+            int randomNumber;
+            try
+            {
+                randomNumber = RemoteApiParser.GetRezult($"https://www.random.org/integers/?num=1&min=1&max={stringBuilder.Length}&col=1&base=10&format=html&rnd=new", "pre", "data");
+                Console.WriteLine($"Случайное число полученное с удалённого API: {randomNumber}");
+            }
+            catch
+            {
+                Random random = new Random();
+                randomNumber = random.Next(1, stringBuilder.Length+1);
+                Console.WriteLine($"Не удалось получить случайное число с удалённого API\nСлучайное число сгенерированное платформой: {randomNumber}");
+            }
+
+
+            Console.WriteLine($"Обработанная строка без одного символа: {stringBuilder.ToString().Remove(randomNumber - 1,1)}");
+
 
         }
 
@@ -127,7 +148,7 @@ namespace PracticeConsoleApp
                     }
                 }
                 if (isVowel)
-                {    
+                {
                     break;
                 }
             }
@@ -171,6 +192,6 @@ namespace PracticeConsoleApp
             return symbolList;
         }
 
-       
+
     }
 }
