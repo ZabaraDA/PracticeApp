@@ -102,10 +102,7 @@ namespace PracticeConsoleApp
                 Console.WriteLine($"Не удалось получить случайное число с удалённого API\nСлучайное число сгенерированное платформой: {randomNumber}");
             }
 
-
             Console.WriteLine($"Обработанная строка без одного символа: {stringBuilder.ToString().Remove(randomNumber - 1,1)}");
-
-
         }
 
         private static string GetSubstring(string line)
