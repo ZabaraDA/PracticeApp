@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using PracticeConsoleApp.Infrastructure;
 using PracticeConsoleApp.Models;
 using PracticeWebApplication.Models;
@@ -12,6 +13,12 @@ namespace PracticeWebApplication.Controllers
     [Route("/api/[controller]")]
     public class LineController : Controller
     {
+        private readonly IConfiguration _configuration;
+        public LineController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         [HttpGet("GetFormattedString")]
         public IActionResult GetFormattedString(string? unformattedString, [Required] TypeSort typeSort)
         {
@@ -39,6 +46,19 @@ namespace PracticeWebApplication.Controllers
                     ErrorMessage = "Введенны нодопустимые символы",
                     InvalidCharacters = invalidCharacters
                 });
+            }
+
+            string[] blackList = _configuration.GetSection("Settings").GetSection("BlackList").Get<string[]>();
+            foreach (var invalidWord in blackList)
+            {
+                if (invalidWord == unformattedString)
+                {
+                    return BadRequest(new
+                    {
+                        ErrorMessage = "Введена недопустимая строка",
+                        BlackListString = unformattedString
+                    });
+                }
             }
 
             StringBuilder stringBuilder = new();
@@ -81,7 +101,7 @@ namespace PracticeWebApplication.Controllers
 
             try
             {
-                randomNumber = RemoteApiParser.GetRezult($"https://www.random.org/integers/?num=1&min=1&max={formattedString.Length}&col=1&base=10&format=html&rnd=new", "pre", "data");
+                randomNumber = RemoteApiParser.GetRezult($"{_configuration.GetValue<string>("RandomApi")}?num=1&min=1&max={formattedString.Length}&col=1&base=10&format=html&rnd=new", "pre", "data");
                 isRemovedApi = true;
             }
             catch
