@@ -1,6 +1,4 @@
-
-
-using Newtonsoft.Json.Converters;
+using PracticeWebApplication.Services;
 using System.Text.Json.Serialization;
 
 namespace PracticeWebApplication
@@ -11,13 +9,13 @@ namespace PracticeWebApplication
         {
             var builder = WebApplication.CreateBuilder(args);
 
-
-            builder.Services.AddControllers().AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter())); ;
+            builder.Services.AddControllers().AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-
+            int maxLimit = builder.Configuration.GetSection("Settings").GetSection("ParallelLimit").Get<int>();
+            builder.Services.AddSingleton(new ParallelLimit(maxLimit));
 
             var app = builder.Build();
 
@@ -34,6 +32,7 @@ namespace PracticeWebApplication
 
 
             app.MapControllers();
+
 
             app.Run();
         }
