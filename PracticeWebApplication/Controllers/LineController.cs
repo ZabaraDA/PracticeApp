@@ -3,9 +3,12 @@ using Microsoft.Extensions.Configuration;
 using PracticeConsoleApp.Infrastructure;
 using PracticeConsoleApp.Models;
 using PracticeWebApplication.Models;
+using PracticeWebApplication.Services;
 using System.ComponentModel.DataAnnotations;
-using System.Data.SqlTypes;
+using System.Net;
 using System.Text;
+
+
 
 namespace PracticeWebApplication.Controllers
 {
@@ -14,17 +17,25 @@ namespace PracticeWebApplication.Controllers
     public class LineController : Controller
     {
         private readonly IConfiguration _configuration;
-        public LineController(IConfiguration configuration)
+        private ParallelLimit _parallelLimit;
+        public LineController(IConfiguration configuration, ParallelLimit parallelLimit)
         {
             _configuration = configuration;
+            _parallelLimit = parallelLimit;
         }
-
         [HttpGet("GetFormattedString")]
         public IActionResult GetFormattedString(string? unformattedString, [Required] TypeSort typeSort)
         {
+
+            if (_parallelLimit.CurrentLimit >= _parallelLimit.MaxLimit)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable,new { ErrorMessage = "Превышено максимальное число запросов" });
+            }
+            _parallelLimit.CurrentLimit++;
+
             if (unformattedString == null || unformattedString.Length == 0)
             {
-                return BadRequest(new { ErrorMessage = "Введена пустая строка" });
+                return BadRequest(new { ErrorMessage = "Введена пустая строка"});
             }
 
             int count = unformattedString.Length;
@@ -113,17 +124,25 @@ namespace PracticeWebApplication.Controllers
 
             string truncatedString = formattedString.Remove(randomNumber - 1, 1);
 
-            return Json(new
+           
+            try
             {
-                FormattedString = formattedString,
-                SymbolCount = GetSymbolСount(formattedString),
-                LongestSubstring = GetSubstring(formattedString),
-                TypeSort = typeSort,
-                SortedString = sortedString,
-                RandomNumber = randomNumber,
-                SourceRandomNumber = isRemovedApi ? "Removed API" : ".NET Tools",
-                TruncatedString = truncatedString
-            });
+                return Json(new
+                {
+                    FormattedString = formattedString,
+                    SymbolCount = GetSymbolСount(formattedString),
+                    LongestSubstring = GetSubstring(formattedString),
+                    TypeSort = typeSort,
+                    SortedString = sortedString,
+                    RandomNumber = randomNumber,
+                    SourceRandomNumber = isRemovedApi ? "Removed API" : ".NET Tools",
+                    TruncatedString = truncatedString
+                });
+            }
+            finally
+            {
+                _parallelLimit.CurrentLimit--;
+            }
         }
 
         private static string GetSubstring(string line)
