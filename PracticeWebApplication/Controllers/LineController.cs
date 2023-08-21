@@ -38,27 +38,6 @@ namespace PracticeWebApplication.Controllers
                 return BadRequest(new { ErrorMessage = "Введена пустая строка"});
             }
 
-            int count = unformattedString.Length;
-            bool isCorrect = true;
-            List<char> invalidCharacters = new List<char>();
-
-            for (int i = 0; i < count; i++)
-            {
-                if (unformattedString[i] is < 'a' or > 'z')
-                {
-                    isCorrect = false;
-                    invalidCharacters.Add((unformattedString[i]));
-                }
-            }
-            if (!isCorrect)
-            {
-                return BadRequest(new
-                {
-                    ErrorMessage = "Введенны нодопустимые символы",
-                    InvalidCharacters = invalidCharacters
-                });
-            }
-
             string[] blackList = _configuration.GetSection("Settings").GetSection("BlackList").Get<string[]>();
             foreach (var invalidWord in blackList)
             {
@@ -71,29 +50,21 @@ namespace PracticeWebApplication.Controllers
                     });
                 }
             }
-
-            StringBuilder stringBuilder = new();
-
-            if (count % 2 == 0)
+            FormattedStringBuilder formattedStringBuilder = new();
+           
+            List<char> invalidCharacters = formattedStringBuilder.GetInvalidCharacters(unformattedString);
+            if (invalidCharacters.Count > 0)
             {
-                for (int i = count / 2; i > 0; i--)
+                return BadRequest(new
                 {
-                    stringBuilder.Append(unformattedString[i - 1]);
-                }
-                for (int i = count; i > count / 2; i--)
-                {
-                    stringBuilder.Append(unformattedString[i - 1]);
-                }
+                    ErrorMessage = "Введенны недопустимые символы",
+                    InvalidCharacters = invalidCharacters
+                });
             }
-            else
-            {
-                for (int i = count; i > 0; i--)
-                {
-                    stringBuilder.Append(unformattedString[i - 1]);
-                }
-                stringBuilder.Append(unformattedString);
-            }
-            string formattedString = stringBuilder.ToString();
+
+            string formattedString = formattedStringBuilder.GetFormattedString(unformattedString);
+            List<SymbolСounter> symbolСounterList = formattedStringBuilder.GetSymbolСount(formattedString);
+            string? longestSubstring = formattedStringBuilder.GetSubstring(formattedString);
 
             SortedString unsortedString = new SortedString(formattedString);
             string sortedString;
@@ -123,15 +94,14 @@ namespace PracticeWebApplication.Controllers
             }
 
             string truncatedString = formattedString.Remove(randomNumber - 1, 1);
-
            
             try
             {
                 return Json(new
                 {
                     FormattedString = formattedString,
-                    SymbolCount = GetSymbolСount(formattedString),
-                    LongestSubstring = GetSubstring(formattedString),
+                    SymbolCount = symbolСounterList,
+                    LongestSubstring = longestSubstring != null ? longestSubstring : "В строке отсутствуют гласные буквы",
                     TypeSort = typeSort,
                     SortedString = sortedString,
                     RandomNumber = randomNumber,
@@ -143,90 +113,6 @@ namespace PracticeWebApplication.Controllers
             {
                 _parallelLimit.CurrentLimit--;
             }
-        }
-
-        private static string GetSubstring(string line)
-        {
-            char[] vowels = { 'a', 'e', 'i', 'o', 'u', 'y' };
-            bool isVowel = false;
-            int start = 0, end = 0;
-
-            for (int i = 0; i < line.Length; i++)
-            {
-                foreach (var vowel in vowels)
-                {
-                    if (vowel == line[i])
-                    {
-                        isVowel = true;
-                        start = i;
-                        break;
-                    }
-                }
-                if (isVowel)
-                {
-                    break;
-                }
-            }
-            if (isVowel == false)
-            {
-                return "В строке отсутствуют гласные буквы";
-            }
-
-            isVowel = false;
-            for (int i = line.Length - 1; i > 0; i--)
-            {
-                foreach (var vowel in vowels)
-                {
-                    if (vowel == line[i])
-                    {
-                        isVowel = true;
-                        end = i;
-                        break;
-                    }
-                }
-                if (isVowel)
-                {
-                    break;
-                }
-            }
-
-            StringBuilder substringBuilder = new();
-
-            for (int i = start; i <= end; i++)
-            {
-                substringBuilder.Append(line[i]);
-            }
-
-            return substringBuilder.ToString();
-        }
-
-        private static List<SymbolСounter> GetSymbolСount(string line)
-        {
-            List<SymbolСounter> symbolList = new();
-
-            for (int i = 0; i < line.Length; i++)
-            {
-                bool isRepeated = false;
-
-                for (int j = 0; j < symbolList.Count; j++)
-                {
-                    if (symbolList[j].Symbol == line[i])
-                    {
-                        symbolList[j].Count++;
-                        isRepeated = true;
-                        break;
-                    }
-                }
-                if (!isRepeated)
-                {
-                    symbolList.Add(new SymbolСounter
-                    {
-                        Symbol = line[i],
-                        Count = 1
-                    });
-                }
-            }
-            return symbolList;
-        }
+        }   
     }
 }
